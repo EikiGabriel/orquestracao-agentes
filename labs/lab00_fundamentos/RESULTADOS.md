@@ -1,7 +1,7 @@
 # Resultados: Lab 0.1
 
 ## Execução base
-- [ ] Rodou no Claude Haiku 5.5
+- [x] Rodou no Claude Haiku 5.5
 - Custo total estimado do lab (Claude): US$ ____
 
 ## A. Idioma
