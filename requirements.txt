@@ -1,0 +1,5 @@
+# SDKs oficiais dos provedores (sem frameworks de agentes até o Módulo 5)
+anthropic
+openai
+google-genai
+python-dotenv
