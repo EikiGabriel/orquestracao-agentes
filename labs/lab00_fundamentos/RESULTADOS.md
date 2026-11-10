@@ -2,7 +2,7 @@
 
 ## Execução base
 - [x] Rodou no Claude Haiku 5.5
-- Custo total estimado do lab (Claude): US$ ____
+- Custo total estimado do lab (Claude): US$ 0,0003 até agora (execução base US$ 0,000062 + B e C US$ 0,000244; o A usa `count_tokens` e não custa nada). Falta o bônus, que dá erro e não deve custar nada.
 
 ## A. Idioma
 | Modelo | Tokens PT | Tokens EN | Razão PT/EN |
@@ -29,11 +29,22 @@ Observação (por que o mesmo texto gasta quantidades diferentes de tokens em PT
 ## B. Stateless
 Em uma frase, com as suas palavras: por que a chamada 2 falhou sem o histórico?
 
->
+> Porque a API não guarda nada entre chamadas: a chamada 2 chegou só com a pergunta, e o "42" estava na chamada 1, que o modelo nunca mais viu.
+
+| Chamada | O que foi enviado | Resposta | Tokens in / out |
+|---|---|---|---|
+| 1 | "Meu número favorito é 42." | Comentou o 42 do *Guia do Mochileiro das Galáxias* | 19 / 201 |
+| 2, sem histórico | só "Qual é meu número favorito?" | "Não sei! Não tenho acesso a informações sobre você além do que você me conta nesta conversa…" | 19 / 163 |
+| 2, com histórico | user → assistant → user | "Pelo que você me disse, seu número favorito é o 42." | 166 / 23 |
+
+Observações:
+- **A memória é o histórico que eu reenvio.** Com o histórico, o modelo "lembrou" porque o fato estava de novo na mesa, não porque guardou algo.
+- **Lembrar custa caro.** A entrada saltou de 19 para 166 tokens (quase 9x), porque reenviei a chamada 1 inteira, incluindo a resposta longa do modelo. Numa conversa longa, cada turno reenvia tudo o que veio antes e fica mais caro que o anterior.
+- **O raciocínio também é cobrado.** Nas chamadas 1 e 2 sem histórico, a resposta veio com um bloco `thinking` antes do `text`: as respostas eram curtas, mas a saída foi de 201 e 163 tokens. Com o histórico, a pergunta ficou fácil e o modelo respondeu direto (só `text`, 23 tokens).
 
 ## C. Corte
-- Motivo de parada com `max_tokens=50`:
-- Veio texto? Se não, por quê?
+- Motivo de parada com `max_tokens=50`: `max_tokens`
+- Veio texto? Se não, por quê? **Não.** A resposta só teve um bloco `thinking` (`blocos: ['thinking']`, out=50). O modelo raciocina antes de escrever, e o raciocínio conta no `max_tokens`: os 50 tokens acabaram ainda no raciocínio, antes de começar o texto. Por isso um teto baixo num modelo que raciocina pode devolver uma resposta vazia, e é preciso olhar o `stop_reason` em vez de supor que veio texto.
 
 ## Bônus
 Mensagem de erro do `temperature=0`:
