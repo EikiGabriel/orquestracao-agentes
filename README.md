@@ -10,18 +10,18 @@ Um **orquestrador** distribui o trabalho entre agentes especializados: Desenvolv
 labs/
   lab00_fundamentos/   # Módulo 0: tokens, contexto, primeira chamada
 .devcontainer/         # ambiente pronto para o GitHub Codespaces
-.env.example           # chaves e modelos (copie para .env, que NUNCA vai para o git)
-requirements.txt       # SDKs oficiais: anthropic, openai, google-genai
+.env.example           # chave e modelo (copie para .env, que NUNCA vai para o git)
+requirements.txt       # SDK oficial da Anthropic
 ```
 
 ## Como rodar
 1. **Code → Codespaces → Create codespace on main**
-2. Cadastre `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` e `OPENAI_API_KEY` como Codespaces secrets, ou crie um `.env` a partir do `.env.example`.
+2. Cadastre `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` como Codespaces secrets, ou crie um `.env` a partir do `.env.example`.
 3. Siga o README de cada lab.
 
 ## Regras do repositório
 - **Nenhuma chave de API no código ou nos commits.** O `.env` está no `.gitignore`.
-- Nada de código ou dados de empresa: os tiers gratuitos usam os dados enviados para treinar modelos.
+- Nada de código ou dados de empresa.
 - Cada lab entra por Pull Request, revisado antes do merge.
 
 ## Progresso
