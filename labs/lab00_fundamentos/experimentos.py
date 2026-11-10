@@ -1,20 +1,28 @@
 """Lab 0.1: experimentos.
 
-Experimento A (idioma): conta os tokens do mesmo texto em PT e em EN.
-Usa count_tokens, que só conta e não gera resposta (custo zero).
+A (idioma): conta os tokens do mesmo texto em PT e em EN.
+   Usa count_tokens, que só conta e não gera resposta (custo zero).
+B (stateless): conta um fato ao modelo e pergunta por ele numa chamada
+   nova, primeiro sem e depois com o histórico.
+C (corte): pede uma explicação longa com max_tokens=50.
 
 Uso:
-    python labs/lab00_fundamentos/experimentos.py
+    python labs/lab00_fundamentos/experimentos.py          # roda A, B e C
+    python labs/lab00_fundamentos/experimentos.py b c      # só os escolhidos
 """
 
 import os
+import sys
 
 import anthropic
 
-from primeira_chamada import chave_api  # também carrega o .env
+# primeira_chamada também carrega o .env
+from primeira_chamada import HAIKU_PRECO_IN, HAIKU_PRECO_OUT, chave_api
 
 client = anthropic.Anthropic(api_key=chave_api())
 MODEL = os.environ["ANTHROPIC_MODEL"]
+
+custo_total = 0.0  # soma das chamadas que geram resposta (B e C)
 
 # Dante, Inferno, Canto I (a loba). Tradução portuguesa antiga.
 TEXTO_PT = """Que me investisse então cuido inquieto;
@@ -80,5 +88,68 @@ def experimento_a() -> None:
     print(f"razão PT/EN (sem sobra): {(pt - sobra) / (en - sobra):.2f}")
 
 
+def chamar(messages: list, max_tokens: int = 500):
+    """Uma chamada ao modelo; soma o custo em custo_total."""
+    global custo_total
+    # Sem temperature: os modelos Claude 5.5 rejeitam esse parâmetro (erro 400)
+    resp = client.messages.create(model=MODEL, max_tokens=max_tokens, messages=messages)
+    custo_total += (
+        resp.usage.input_tokens * HAIKU_PRECO_IN
+        + resp.usage.output_tokens * HAIKU_PRECO_OUT
+    ) / 1_000_000
+    return resp
+
+
+def texto(resp) -> str:
+    # Filtra pelo tipo do bloco; nunca use resp.content[0] (pode ser 'thinking')
+    return "".join(b.text for b in resp.content if b.type == "text").strip()
+
+
+def mostrar(rotulo: str, resp) -> None:
+    print(f"[{rotulo}]")
+    print(f"  resposta : {texto(resp) or '(nenhum texto)'}")
+    print(f"  parada   : {resp.stop_reason}")
+    print(f"  tokens   : in={resp.usage.input_tokens}  out={resp.usage.output_tokens}")
+    print(f"  blocos   : {[b.type for b in resp.content]}")
+
+
+def experimento_b() -> None:
+    print("\n== Experimento B: stateless ==")
+    fato = {"role": "user", "content": "Meu número favorito é 42."}
+    pergunta = {"role": "user", "content": "Qual é meu número favorito?"}
+
+    r1 = chamar([fato])
+    mostrar("chamada 1: conta o fato", r1)
+
+    # Chamada nova, só com a pergunta: a API não guarda nada da chamada 1
+    r2 = chamar([pergunta])
+    mostrar("chamada 2: sem histórico", r2)
+
+    # Agora reenviando o histórico completo: user -> assistant -> user
+    historico = [fato, {"role": "assistant", "content": texto(r1)}, pergunta]
+    r3 = chamar(historico)
+    mostrar("chamada 2: com histórico", r3)
+
+
+def experimento_c() -> None:
+    print("\n== Experimento C: corte com max_tokens=50 ==")
+    pedido = (
+        "Explique em detalhes como funciona a arquitetura Transformer: "
+        "embeddings, atenção, camadas feed-forward e geração de texto."
+    )
+    r = chamar([{"role": "user", "content": pedido}], max_tokens=50)
+    mostrar("max_tokens=50", r)
+    print(f"  veio texto? {'sim' if texto(r) else 'não'}")
+
+
+EXPERIMENTOS = {"a": experimento_a, "b": experimento_b, "c": experimento_c}
+
+
 if __name__ == "__main__":
-    experimento_a()
+    escolhidos = [a.lower() for a in sys.argv[1:]] or list(EXPERIMENTOS)
+    invalidos = [n for n in escolhidos if n not in EXPERIMENTOS]
+    if invalidos:
+        sys.exit(f"Experimentos inválidos: {invalidos}. Use: {', '.join(EXPERIMENTOS)}")
+    for nome in escolhidos:
+        EXPERIMENTOS[nome]()
+    print(f"\ncusto estimado desta execução: US$ {custo_total:.6f}")
