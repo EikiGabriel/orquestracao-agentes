@@ -1,16 +1,15 @@
 # Resultados: Lab 0.1
 
 ## Execução base
-- [ ] Rodou em pelo menos 2 provedores
+- [ ] Rodou no Claude Haiku 5.5
 - Custo total estimado do lab (Claude): US$ ____
 
 ## A. Idioma
-| Provedor | Tokens PT | Tokens EN | Razão PT/EN |
+| Modelo | Tokens PT | Tokens EN | Razão PT/EN |
 |---|---|---|---|
 | Claude (Haiku 5.5) | | | |
-| Gemini | | | |
 
-Observação (os dois provedores contam igual? por quê?):
+Observação (por que o mesmo texto gasta quantidades diferentes de tokens em PT e EN?):
 
 ## B. Stateless
 Em uma frase, com as suas palavras: por que a chamada 2 falhou sem o histórico?
