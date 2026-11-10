@@ -6,7 +6,7 @@
 
 ## Preparação
 1. Abra este repositório no Codespaces: **Code → Codespaces → Create codespace on main**. As dependências são instaladas sozinhas.
-2. Cadastre `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` como Codespaces secrets em github.com/settings/codespaces, ou copie `.env.example` para `.env` e preencha.
+2. Cadastre `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` como Codespaces secrets em github.com/settings/codespaces, ou copie `.env.example` para `.env` e preencha. Nas sessões do Claude Code na nuvem, use o nome `LAB_ANTHROPIC_API_KEY` para a chave.
 3. Rode:
    ```bash
    python labs/lab00_fundamentos/primeira_chamada.py
