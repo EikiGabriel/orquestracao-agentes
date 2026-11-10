@@ -10,7 +10,8 @@ Uso:
     python labs/lab00_fundamentos/primeira_chamada.py
     python labs/lab00_fundamentos/primeira_chamada.py "Sua pergunta aqui"
 
-Precisa de ANTHROPIC_API_KEY e ANTHROPIC_MODEL (veja .env.example).
+Precisa de ANTHROPIC_MODEL e da chave em LAB_ANTHROPIC_API_KEY ou
+ANTHROPIC_API_KEY (veja .env.example).
 """
 
 import os
@@ -29,10 +30,16 @@ HAIKU_PRECO_IN = 0.10
 HAIKU_PRECO_OUT = 0.50
 
 
+def chave_api() -> str | None:
+    # LAB_ANTHROPIC_API_KEY vem primeiro: nas sessões do Claude Code na nuvem,
+    # a variável ANTHROPIC_API_KEY não chega ao script.
+    return os.getenv("LAB_ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
+
+
 def chamar_claude(pergunta: str) -> dict:
     import anthropic
 
-    client = anthropic.Anthropic()  # usa ANTHROPIC_API_KEY
+    client = anthropic.Anthropic(api_key=chave_api())
     model = os.environ["ANTHROPIC_MODEL"]
     messages = [{"role": "user", "content": pergunta}]
 
@@ -64,7 +71,11 @@ def main() -> None:
     pergunta = sys.argv[1] if len(sys.argv) > 1 else PERGUNTA_PADRAO
     print(f"Pergunta: {pergunta}\n")
 
-    faltando = [v for v in ("ANTHROPIC_API_KEY", "ANTHROPIC_MODEL") if not os.getenv(v)]
+    faltando = []
+    if not chave_api():
+        faltando.append("LAB_ANTHROPIC_API_KEY (ou ANTHROPIC_API_KEY)")
+    if not os.getenv("ANTHROPIC_MODEL"):
+        faltando.append("ANTHROPIC_MODEL")
     if faltando:
         sys.exit(f"Defina {' e '.join(faltando)} (veja .env.example).")
 

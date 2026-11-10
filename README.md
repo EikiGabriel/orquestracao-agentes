@@ -16,7 +16,7 @@ requirements.txt       # SDK oficial da Anthropic
 
 ## Como rodar
 1. **Code → Codespaces → Create codespace on main**
-2. Cadastre `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` como Codespaces secrets, ou crie um `.env` a partir do `.env.example`.
+2. Cadastre `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` como Codespaces secrets, ou crie um `.env` a partir do `.env.example`. Nas sessões do Claude Code na nuvem, cadastre a chave como `LAB_ANTHROPIC_API_KEY`.
 3. Siga o README de cada lab.
 
 ## Regras do repositório
